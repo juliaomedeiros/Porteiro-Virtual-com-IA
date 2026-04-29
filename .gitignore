@@ -1,0 +1,54 @@
+# .gitignore para Porteiro Virtual com IA
+
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configurações e Segredos
+.env
+.env.local
+.env.*.local
+*.secrets
+*.pem
+*.key
+
+# Docker
+.docker/
+# docker-compose.override.yml (opcional, se quiser permitir overrides locais)
+
+# Node/Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+.eslintcache
+
+# IDEs e Ferramentas
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs e Dados Temporários
+*.log
+logs/
+temp/
+tmp/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Dados de Banco Local (Docker Volumes)
+postgres_data/
+
+# LangSmith / LangChain
+.langchain/
+.langsmith/

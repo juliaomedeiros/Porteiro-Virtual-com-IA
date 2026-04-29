@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **MVP Escalonável**: O design evita overengineering e garante separação de responsabilidades (IA vs. Integração vs. Negócio)?
+- [ ] **Segurança & Privacidade**: Foram definidos guardrails contra prompt injection e validações para dados sensíveis?
+- [ ] **Testabilidade**: O plano inclui testes unitários/integração para as regras de negócio centrais?
+- [ ] **UX/UI & Localização**: A comunicação planejada está em PT-BR e segue padrões modernos?
+- [ ] **Padrões**: Variáveis/funções em inglês e documentação em PT-BR?
 
 ## Project Structure
 

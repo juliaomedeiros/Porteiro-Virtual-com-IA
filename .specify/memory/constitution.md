@@ -1,50 +1,47 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!-- 
+Sync Impact Report
+- Version change: 0.0.0 -> 1.0.0
+- List of modified principles:
+    - [PRINCIPLE_1_NAME] -> I. Mentalidade MVP Escalonável
+    - [PRINCIPLE_2_NAME] -> II. Segurança e Privacidade First
+    - [PRINCIPLE_3_NAME] -> III. Testabilidade e Qualidade
+    - [PRINCIPLE_4_NAME] -> IV. UX/UI de Excelência e Localização
+    - [PRINCIPLE_5_NAME] -> V. Padrões de Codificação e Documentação
+- Added sections: Diretrizes Técnicas, Workflow de Desenvolvimento
+- Removed sections: None
+- Templates requiring updates:
+    - .specify/templates/plan-template.md (✅ updated)
+- Follow-up TODOs: None
+-->
+# Portaria Agent Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Mentalidade MVP Escalonável
+O código deve ser simples e funcional para um MVP rápido, mas obrigatoriamente modular. Evite overengineering, garantindo separação clara de responsabilidades entre lógica de IA, integração (ex: WhatsApp) e regras de negócio do condomínio para facilitar a manutenção e o reaproveitamento.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Segurança e Privacidade First
+Como lidaremos com dados sensíveis de moradores, o sistema deve ter validação rigorosa de todas as entradas. É obrigatório implementar guardrails focados em evitar prompt injection e vazamento de informações contextuais ou privadas.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Testabilidade e Qualidade
+Todo código de regra de negócio central deve vir acompanhado de testes unitários e de integração. A arquitetura deve permitir a adoção progressiva de TDD (Test-Driven Development) conforme o projeto escala.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. UX/UI de Excelência e Localização
+Interfaces devem ser responsivas, modernas e seguir as melhores práticas de mercado. A comunicação da IA com o usuário deve ser clara, amigável e obrigatoriamente em Português do Brasil (PT-BR).
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Padrões de Codificação e Documentação
+Utilize nomes de variáveis e funções descritivos e em inglês. No entanto, todo o conteúdo voltado ao usuário final e a documentação técnica devem ser redigidos em Português do Brasil (PT-BR).
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Diretrizes Técnicas
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+Priorizar a modularidade para permitir a substituição de provedores de LLM ou canais de mensageria sem necessidade de refatoração do núcleo de regras de negócio.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Workflow de Desenvolvimento
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Todo novo recurso ou alteração estrutural deve ser precedido por uma especificação e plano de implementação que valide explicitamente a aderência aos princípios desta Constituição.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Esta Constituição é a autoridade máxima sobre padrões técnicos e éticos do projeto. Alterações no texto constitucional exigem uma revisão de impacto em todos os templates e artefatos de design ativos.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-04-27 | **Last Amended**: 2026-04-27
