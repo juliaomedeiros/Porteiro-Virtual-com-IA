@@ -52,4 +52,4 @@ Consulte o arquivo [quickstart.md](specs/001-porteiro-virtual-ia/quickstart.md) 
 O projeto implementa **Security Guardrails** contra *Prompt Injection* e garante que os dados dos moradores (como CPF e Telefone) sejam criptografados em repouso, respeitando a privacidade entre unidades.
 
 ---
-*Este projeto é desenvolvido com o auxílio do Gemini CLI e Spec Kit.*
+

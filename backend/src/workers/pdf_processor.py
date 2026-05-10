@@ -1,0 +1,50 @@
+import fitz  # PyMuPDF
+import pymupdf4llm
+from typing import List, Dict, Any
+import os
+
+class PDFProcessor:
+    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+
+    def extract_text(self, file_path: str) -> str:
+        """
+        Extracts text from a PDF file using PyMuPDF4LLM for better markdown formatting.
+        """
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+            
+        # pymupdf4llm converts PDF to Markdown which is great for LLMs
+        md_text = pymupdf4llm.to_markdown(file_path)
+        
+        # If extraction result is too small, it might be a scanned image
+        if len(md_text.strip()) < 50:
+            return self._ocr_fallback(file_path)
+            
+        return md_text
+
+    def _ocr_fallback(self, file_path: str) -> str:
+        """
+        Fallback to OCR if text extraction fails or returns too little text.
+        Note: Requires Tesseract OCR installed on the system.
+        """
+        # Placeholder for OCR implementation
+        # In a real scenario, we would use pytesseract here
+        # for page in doc: image = page.get_pixmap(); ...
+        return "[OCR Fallback required - scanned document detected]"
+
+    def create_chunks(self, text: str) -> List[str]:
+        """
+        Splits text into smaller chunks for embedding.
+        Simple character-based chunking for now, can be improved.
+        """
+        chunks = []
+        start = 0
+        while start < len(text):
+            end = start + self.chunk_size
+            chunks.append(text[start:end])
+            start += self.chunk_size - self.chunk_overlap
+        return chunks
+
+pdf_processor = PDFProcessor()

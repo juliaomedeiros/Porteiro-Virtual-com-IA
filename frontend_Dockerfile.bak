@@ -1,0 +1,6 @@
+FROM node:18-slim
+
+WORKDIR /app
+
+# Temporary: just a placeholder until T016
+CMD ["npx", "http-server", "-p", "3000"]
