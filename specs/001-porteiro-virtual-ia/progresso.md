@@ -43,5 +43,5 @@
 - [X] T018 [P] [US1] Implementar telas de upload de Documentos e monitoramento de RAG. (Concluído: Telas de upload e listagem de documentos implementadas em app/documents/. Implementado backend API para upload de documentos e processamento em background com RAG.)
 - [X] T019 [US5] Implementar Dashboard de Interações e painel de alertas de **escalation**. (Concluído: Dashboard de analytics implementado em app/dashboard/ com estatísticas de uso, taxa de escalonamento e logs recentes. Implementado backend API para analytics.)
 
-### Fase 9: Polimento e Questões Transversais
-- [X] T020 Auditoria final de performance e revisão de otimização de uso de tokens em todos os fluxos. (Concluído: Auditoria realizada. Implementado summarização de histórico em MemoryService e limites de contexto em RAGService para otimização de tokens. Sistema de Webhook totalmente integrado com o fluxo de IA.)
+### Fase 10: Melhorias de Segurança e Controle de Acesso
+- [X] T021 [US3] Implementar Controle de Acesso Baseado em Funções (RBAC) no Frontend. (Concluído: Implementado sistema de autenticação simulado with AuthContext. Adicionado UserSwitcher para testes. Filtros de visibilidade por condomínio para Síndico/Porteiro e restrições de escrita (somente leitura) implementadas em todas as telas. Documentação de teste atualizada em RUNNING.md.)

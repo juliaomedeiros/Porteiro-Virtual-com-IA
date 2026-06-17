@@ -3,98 +3,187 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { moradoresApi, Morador } from '@/lib/api';
-import styles from './residents.module.css';
+import { useAuth } from '@/lib/auth';
+import PageHeader from '@/components/PageHeader';
+import { 
+  Search, 
+  UserPlus, 
+  Trash2, 
+  Edit3, 
+  User,
+  Phone,
+  Home,
+  ChevronRight
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function ResidentsList() {
+  const { user, isAdmin } = useAuth();
   const [residents, setResidents] = useState<Morador[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    fetchResidents();
-  }, []);
+    if (user) {
+      fetchResidents();
+    }
+  }, [user]);
 
   const fetchResidents = async () => {
     try {
       setLoading(true);
-      const response = await moradoresApi.list();
+      const condominioId = isAdmin ? undefined : user?.condominioId;
+      const response = await moradoresApi.list(condominioId);
       setResidents(response.data);
       setError(null);
     } catch (err: any) {
       console.error('Error fetching residents:', err);
-      setError('Failed to load residents. Please try again later.');
+      setError('Falha ao carregar moradores. Tente novamente mais tarde.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this resident?')) return;
+    if (!isAdmin) return;
+    if (!confirm('Tem certeza que deseja excluir este morador?')) return;
     
     try {
       await moradoresApi.delete(id);
       setResidents(residents.filter(r => r.id !== id));
     } catch (err) {
       console.error('Error deleting resident:', err);
-      alert('Failed to delete resident.');
+      alert('Falha ao excluir morador.');
     }
   };
 
-  if (loading) return <div className={styles.loading}>Loading residents...</div>;
+  const filteredResidents = residents.filter(r => 
+    r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.unit.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Residents</h1>
-        <Link href="/residents/new" className={styles.button}>
-          New Resident
-        </Link>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Gestão de Moradores</h1>
+          <p className="text-slate-500 mt-1">{isAdmin ? "Gerencie os moradores de todos os condomínios." : "Lista de moradores autorizados do seu condomínio."}</p>
+        </div>
+        
+        {isAdmin && (
+          <Button render={<Link href="/residents/new" />} className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <UserPlus size={18} />
+            Novo Morador
+          </Button>
+        )}
       </div>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium border border-red-100">
+          {error}
+        </div>
+      )}
 
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.th}>Name</th>
-              <th className={styles.th}>Unit</th>
-              <th className={styles.th}>Phone</th>
-              <th className={styles.th}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {residents.length === 0 ? (
-              <tr>
-                <td colSpan={4} className={styles.td} style={{ textAlign: 'center' }}>
-                  No residents found.
-                </td>
-              </tr>
-            ) : (
-              residents.map((resident) => (
-                <tr key={resident.id}>
-                  <td className={styles.td}>{resident.name}</td>
-                  <td className={styles.td}>{resident.unit}</td>
-                  <td className={styles.td}>{resident.phone}</td>
-                  <td className={styles.td}>
-                    <div className={styles.actions}>
-                      <Link href={`/residents/${resident.id}`} className={`${styles.button} ${styles.buttonSecondary}`}>
-                        Edit
-                      </Link>
-                      <button 
-                        onClick={() => handleDelete(resident.id)} 
-                        className={`${styles.button} ${styles.buttonDanger}`}
-                      >
-                        Delete
-                      </button>
+      <Card>
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Input 
+              type="text" 
+              placeholder="Buscar por nome ou unidade..." 
+              className="pl-10 bg-white"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow>
+                <TableHead>Morador</TableHead>
+                <TableHead>Unidade</TableHead>
+                <TableHead>WhatsApp</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                [1, 2, 3].map(i => (
+                  <TableRow key={i} className="animate-pulse">
+                    <TableCell colSpan={4} className="h-16" />
+                  </TableRow>
+                ))
+              ) : filteredResidents.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <User size={40} strokeWidth={1.5} className="mb-2 opacity-50" />
+                      <p className="font-medium text-slate-600">Nenhum morador encontrado</p>
+                      <p className="text-sm">Tente mudar os termos da busca.</p>
                     </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredResidents.map((resident) => (
+                  <TableRow key={resident.id} className="group">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
+                          {resident.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-slate-900">{resident.name}</span>
+                          <span className="text-xs text-slate-500">CPF: {resident.cpf || 'Não informado'}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-slate-600">
+                        <Home size={14} className="text-slate-400" />
+                        {resident.unit}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-slate-600">
+                        <Phone size={14} className="text-slate-400" />
+                        {resident.phone}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {isAdmin && (
+                          <>
+                            <Button variant="ghost" size="icon" render={<Link href={`/residents/${resident.id}`} />} className="text-slate-400 hover:text-blue-600 hover:bg-blue-50">
+                              <Edit3 size={16} />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(resident.id)} className="text-slate-400 hover:text-red-500 hover:bg-red-50">
+                              <Trash2 size={16} />
+                            </Button>
+                          </>
+                        )}
+                        <ChevronRight size={16} className="text-slate-300 ml-2" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }

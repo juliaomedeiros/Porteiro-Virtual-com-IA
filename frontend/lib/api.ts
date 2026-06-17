@@ -51,6 +51,12 @@ export const condominiosApi = {
     api.get<Condominio[]>('/condominios/'),
   get: (id: string) => 
     api.get<Condominio>(`/condominios/${id}`),
+  create: (data: Partial<Condominio>) => 
+    api.post<Condominio>('/condominios/', data),
+  update: (id: string, data: Partial<Condominio>) => 
+    api.patch<Condominio>(`/condominios/${id}`, data),
+  delete: (id: string) => 
+    api.delete(`/condominios/${id}`),
 };
 
 export interface Documento {
@@ -81,8 +87,8 @@ export const documentosApi = {
 
 export interface Interacao {
   id: string;
-  user_message: str;
-  ai_response: str;
+  user_message: string;
+  ai_response: string;
   token_usage: number | null;
   latency_ms: number | null;
   is_escalated: boolean;
@@ -95,6 +101,28 @@ export interface Stats {
   escalated_interactions: number;
   total_tokens_used: number;
   escalation_rate: number;
+}
+
+export const areasComunsApi = {
+  list: (condominio_id?: string) => 
+    api.get<AreaComum[]>('/areas-comuns/', { params: { condominio_id } }),
+  get: (id: string) => 
+    api.get<AreaComum>(`/areas-comuns/${id}`),
+  create: (data: Partial<AreaComum>) => 
+    api.post<AreaComum>('/areas-comuns/', data),
+  update: (id: string, data: Partial<AreaComum>) => 
+    api.patch<AreaComum>(`/areas-comuns/${id}`, data),
+  delete: (id: string) => 
+    api.delete(`/areas-comuns/${id}`),
+};
+
+export interface AreaComum {
+  id: string;
+  name: string;
+  description: string | null;
+  max_capacity: number | null;
+  rules: string | null;
+  condominio_id: string;
 }
 
 export const analyticsApi = {

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .api import webhooks, condominios, moradores, areas_comuns, documentos, analytics
 
@@ -8,12 +9,21 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-app.include_router(webhooks.router)
-app.include_router(condominios.router)
-app.include_router(moradores.router)
-app.include_router(areas_comuns.router)
-app.include_router(documentos.router)
-app.include_router(analytics.router)
+# Set all origins to wildcard for development or specify frontend URLs
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(webhooks.router, prefix=settings.API_V1_STR)
+app.include_router(condominios.router, prefix=settings.API_V1_STR)
+app.include_router(moradores.router, prefix=settings.API_V1_STR)
+app.include_router(areas_comuns.router, prefix=settings.API_V1_STR)
+app.include_router(documentos.router, prefix=settings.API_V1_STR)
+app.include_router(analytics.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():

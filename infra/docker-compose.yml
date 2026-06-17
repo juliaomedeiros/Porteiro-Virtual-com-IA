@@ -25,7 +25,12 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://user:pass@db:5432/porteiro_db
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
+      LANGCHAIN_TRACING_V2: ${LANGCHAIN_TRACING_V2}
+      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT}
     depends_on:
       db:
         condition: service_healthy
@@ -41,12 +46,38 @@ services:
       dockerfile: Dockerfile
     container_name: porteiro_frontend
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
     depends_on:
       backend:
         condition: service_started
+
+  evolution-go:
+    image: evoapicloud/evolution-go:latest
+    container_name: evolution-go
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+    environment:
+      - SERVER_PORT=8080
+      - GLOBAL_API_KEY=${EVOLUTION_API_KEY}
+      - POSTGRES_AUTH_DB=postgresql://user:pass@db:5432/porteiro_db?sslmode=disable
+      - POSTGRES_USERS_DB=postgresql://user:pass@db:5432/porteiro_db?sslmode=disable
+      - DATABASE_SAVE_MESSAGES=false
+      - LOGTYPE=console
+    depends_on:
+      db:
+        condition: service_healthy
+
+  evolution-manager:
+    image: evoapicloud/evolution-manager:latest
+    container_name: evolution-manager
+    restart: unless-stopped
+    ports:
+      - "8089:80"
+    depends_on:
+      - evolution-go
 
 volumes:
   postgres_data:

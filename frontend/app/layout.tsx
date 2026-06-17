@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from 'next/link';
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth";
+import Sidebar from "@/components/Sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,25 +26,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
-        <nav style={{ 
-          backgroundColor: '#333', 
-          color: 'white', 
-          padding: '1rem 2rem',
-          display: 'flex',
-          gap: '2rem',
-          alignItems: 'center'
-        }}>
-          <Link href="/" style={{ fontSize: '1.2rem', fontWeight: 'bold', textDecoration: 'none', color: 'white' }}>
-            Porteiro IA
-          </Link>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <Link href="/residents" style={{ textDecoration: 'none', color: '#ccc' }}>Moradores</Link>
-            <Link href="/documents" style={{ textDecoration: 'none', color: '#ccc' }}>Documentos & RAG</Link>
-            <Link href="/dashboard" style={{ textDecoration: 'none', color: '#ccc' }}>Dashboard</Link>
+      <body className="antialiased">
+        <AuthProvider>
+          <div className="flex min-h-screen bg-slate-50">
+            <Sidebar />
+            <main className="flex-1 lg:pl-64 flex flex-col min-h-screen">
+              <div className="flex-1 p-4 lg:p-8 mt-14 lg:mt-0">
+                {children}
+              </div>
+            </main>
           </div>
-        </nav>
-        {children}
+        </AuthProvider>
       </body>
     </html>
   );
