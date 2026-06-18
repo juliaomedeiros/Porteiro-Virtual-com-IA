@@ -14,6 +14,8 @@ export interface Morador {
   phone: string;
   unit: string;
   is_active: boolean;
+  is_sindico: boolean;
+  status_bot: string;
   condominio_id: string;
   created_at?: string;
 }
@@ -40,7 +42,7 @@ export const moradoresApi = {
     api.get<Morador>(`/moradores/${id}`),
   create: (data: MoradorCreate) => 
     api.post<Morador>('/moradores/', data),
-  update: (id: string, data: Partial<MoradorCreate>) => 
+  update: (id: string, data: Partial<Morador>) => 
     api.patch<Morador>(`/moradores/${id}`, data),
   delete: (id: string) => 
     api.delete(`/moradores/${id}`),
@@ -57,6 +59,8 @@ export const condominiosApi = {
     api.patch<Condominio>(`/condominios/${id}`, data),
   delete: (id: string) => 
     api.delete(`/condominios/${id}`),
+  broadcast: (id: string, message: string, instance_name: string = "default") =>
+    api.post(`/condominios/${id}/broadcast`, { message, instance_name }),
 };
 
 export interface Documento {
@@ -64,6 +68,7 @@ export interface Documento {
   name: string;
   file_url: string | null;
   status: 'PROCESSANDO' | 'INDEXADO' | 'ERRO';
+  error_message: string | null;
   condominio_id: string;
   created_at: string;
 }
@@ -130,6 +135,29 @@ export const analyticsApi = {
     api.get<Stats>('/analytics/stats', { params: { condominio_id } }),
   getLogs: (condominio_id: string, params?: { limit?: number, only_escalated?: boolean }) => 
     api.get<Interacao[]>('/analytics/logs', { params: { ...params, condominio_id } }),
+};
+
+export interface Encomenda {
+  id: string;
+  destinatario: string;
+  unidade: string;
+  tamanho: string;
+  descricao: string | null;
+  foto_url: string | null;
+  status: string;
+  condominio_id: string;
+  created_at: string;
+}
+
+export const encomendasApi = {
+  list: (condominio_id: string) => 
+    api.get<Encomenda[]>('/encomendas/', { params: { condominio_id } }),
+  create: (data: Partial<Encomenda>) => 
+    api.post<Encomenda>('/encomendas/', data),
+  update: (id: string, data: Partial<Encomenda>) => 
+    api.patch<Encomenda>(`/encomendas/${id}`, data),
+  delete: (id: string) => 
+    api.delete(`/encomendas/${id}`),
 };
 
 export default api;

@@ -1,4 +1,4 @@
-﻿# Tarefas: Porteiro Virtual com IA
+# Tarefas: Porteiro Virtual com IA
 
 ## Fase 1 e 2: Setup e Base (Backend / Infra)
 - [X] T001 Criar estrutura de monorepo e testes iniciais.
@@ -31,13 +31,13 @@
 ---
 ## FASE 10: NOVA ARQUITETURA DE IA E OPERAÇÃO (A IMPLEMENTAR)
 
-- [ ] T023 [Backend] Configurar camada LiteLLM para ser provedor-agnóstica e ler a API_KEY criptografada direto do Banco de Dados.
-- [ ] T024 [Backend] Criar tabela configuracao_ia (Prompt e Modelo) e ajustar injeção dinâmica no momento da chamada (Prompt DB + Dados Morador + 7 últimas interações).
-- [ ] T025 [Backend] Implementar Guardrail Rígido de Autenticação: Bloquear webhook no início com a mensagem "Não há cadastro desse numero" e não chamar IA se número não existir.
-- [ ] T026 [Backend] Implementar Roteador Semântico de Intenção (Filtro barato) antes de gastar tokens de RAG, definindo limite estrito de 2 parágrafos.
-- [ ] T027 [Backend/Frontend] Lógica de Transbordo Automático: Campo status_bot na tabela Morador. Notificação omnichannel para o Síndico (Painel e Whats). Auto-resume de PAUSADO para ATIVO após 30min de inatividade.
-- [ ] T028 [Frontend/Backend] Comunicados (Mensagens em Massa): Tela no Painel Admin/Síndico e backend que dispara lotes no Evolution-go filtrando apenas os moradores do condomínio do síndico.
-- [ ] T029 [Frontend/Backend] Encomendas: Nova tabela encomenda, tela Registrar Encomenda (Apto, Destinatário, Tamanho, Descrição, Foto opcional) e envio do template de WhatsApp fixo.
-- [ ] T030 [Frontend/Backend] Rotatividade de Moradores: Refatorar tela de edição de moradores permitindo deletar/adicionar números na mesma unidade (Aluguel), e visualizações baseadas no Síndico vinculado ao Condo.
+- [X] T023 [Backend] Configurar camada LiteLLM para ser provedor-agnóstica e ler a API_KEY criptografada direto do Banco de Dados.
+- [X] T024 [Backend] Criar tabela configuracao_ia (Prompt e Modelo) e ajustar injeção dinâmica no momento da chamada (Prompt DB + Dados Morador + 7 últimas interações).
+- [X] T025 [Backend] Implementar Guardrail Rígido de Autenticação: Bloquear webhook no início com a mensagem "Não há cadastro desse numero" e não chamar IA se número não existir.
+- [X] T026 [Backend] Implementar Roteador Semântico de Intenção (Filtro barato) antes de gastar tokens de RAG, definindo limite estrito de 2 parágrafos.
+- [X] T027 [Backend/Frontend] Lógica de Transbordo Automático: Campo status_bot na tabela Morador. Notificação omnichannel para o Síndico (Painel e Whats). Auto-resume de PAUSADO para ATIVO após 30min de inatividade.
+- [X] T028 [Frontend/Backend] Comunicados (Mensagens em Massa): Tela no Painel Admin/Síndico e backend que dispara lotes no Evolution-go filtrando apenas os moradores do condomínio do síndico.
+- [X] T029 [Frontend/Backend] Encomendas: Nova tabela encomenda, tela Registrar Encomenda (Apto, Destinatário, Tamanho, Descrição, Foto opcional) e envio do template de WhatsApp fixo.
+- [X] T030 [Frontend/Backend] Rotatividade de Moradores: Refatorar tela de edição de moradores permitindo deletar/adicionar números na mesma unidade (Aluguel), e visualizações baseadas no Síndico vinculado ao Condo.
 
 

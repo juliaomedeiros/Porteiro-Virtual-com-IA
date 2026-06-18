@@ -116,6 +116,7 @@ export default function ResidentsList() {
                 <TableHead>Morador</TableHead>
                 <TableHead>Unidade</TableHead>
                 <TableHead>WhatsApp</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -123,12 +124,12 @@ export default function ResidentsList() {
               {loading ? (
                 [1, 2, 3].map(i => (
                   <TableRow key={i} className="animate-pulse">
-                    <TableCell colSpan={4} className="h-16" />
+                    <TableCell colSpan={5} className="h-16" />
                   </TableRow>
                 ))
               ) : filteredResidents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-48 text-center">
+                  <TableCell colSpan={5} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <User size={40} strokeWidth={1.5} className="mb-2 opacity-50" />
                       <p className="font-medium text-slate-600">Nenhum morador encontrado</p>
@@ -160,6 +161,26 @@ export default function ResidentsList() {
                       <div className="flex items-center gap-1.5 text-slate-600">
                         <Phone size={14} className="text-slate-400" />
                         {resident.phone}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {!resident.is_active ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full w-fit bg-red-100 text-red-700">
+                            INATIVO (MUDOU)
+                          </span>
+                        ) : (
+                          <>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${resident.status_bot === 'ATIVO' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                              BOT: {resident.status_bot}
+                            </span>
+                            {resident.is_sindico && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full w-fit bg-purple-100 text-purple-700">
+                                SÍNDICO
+                              </span>
+                            )}
+                          </>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">

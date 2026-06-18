@@ -14,11 +14,14 @@ class MoradorBase(SQLModel):
     phone: str = Field(index=True, unique=True)
     unit: str
     is_active: bool = Field(default=True)
+    is_sindico: bool = Field(default=False)
+    status_bot: str = Field(default="ATIVO")
     condominio_id: UUID = Field(foreign_key="condominio.id")
 
 class Morador(MoradorBase, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     condominio: "Condominio" = Relationship(back_populates="moradores")
     reservas: List["Reserva"] = Relationship(back_populates="morador")

@@ -5,6 +5,8 @@ from .documento import Documento
 from .reserva import Reserva
 from .embedding import Embedding
 from .interacao import Interacao
+from .configuracao_ia import ConfiguracaoIA
+from .encomenda import Encomenda
 
 __all__ = [
     "Condominio",
@@ -14,4 +16,6 @@ __all__ = [
     "Reserva",
     "Embedding",
     "Interacao",
+    "ConfiguracaoIA",
+    "Encomenda",
 ]

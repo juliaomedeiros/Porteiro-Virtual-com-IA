@@ -70,14 +70,5 @@ services:
       db:
         condition: service_healthy
 
-  evolution-manager:
-    image: evoapicloud/evolution-manager:latest
-    container_name: evolution-manager
-    restart: unless-stopped
-    ports:
-      - "8089:80"
-    depends_on:
-      - evolution-go
-
 volumes:
   postgres_data:

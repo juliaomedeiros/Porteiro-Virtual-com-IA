@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     EVOLUTION_API_URL: Optional[str] = None
     EVOLUTION_API_KEY: Optional[str] = None
     
+    ENCRYPTION_KEY: Optional[str] = None
+    
     LANGSMITH_API_KEY: Optional[str] = None
     LANGCHAIN_TRACING_V2: str = "false"
     LANGCHAIN_ENDPOINT: str = "https://api.smith.langchain.com"

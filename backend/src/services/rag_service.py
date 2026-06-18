@@ -10,8 +10,9 @@ import uuid
 class RAGService:
     def __init__(self):
         self.embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001",
-            google_api_key=settings.GOOGLE_API_KEY
+            model="gemini-embedding-2",  
+            google_api_key=settings.GOOGLE_API_KEY,
+            output_dimensionality=768
         )
 
     async def add_chunks(self, session: Session, doc_id: uuid.UUID, chunks: List[str], metadatas: List[Dict[str, Any]] = None):

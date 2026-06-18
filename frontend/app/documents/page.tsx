@@ -207,7 +207,14 @@ export default function DocumentsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          {getStatusBadge(doc.status)}
+                          <div className="flex flex-col gap-1">
+                            <div>{getStatusBadge(doc.status)}</div>
+                            {doc.status === 'ERRO' && doc.error_message && (
+                              <span className="text-xs text-red-600 max-w-xs truncate" title={doc.error_message}>
+                                {doc.error_message}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-500">
                           {new Date(doc.created_at).toLocaleDateString('pt-BR')}

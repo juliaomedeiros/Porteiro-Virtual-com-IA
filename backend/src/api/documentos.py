@@ -43,6 +43,7 @@ async def process_document(doc_id: UUID, file_path: str):
         except Exception as e:
             print(f"Error processing document {doc_id}: {e}")
             db_doc.status = DocumentoStatus.ERRO
+            db_doc.error_message = str(e)
             session.add(db_doc)
             session.commit()
         finally:

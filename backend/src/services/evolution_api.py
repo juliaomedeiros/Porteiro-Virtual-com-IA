@@ -11,12 +11,11 @@ class EvolutionAPIClient:
             "Content-Type": "application/json"
         }
 
-    async def send_text(self, instance: str, number: str, text: str) -> Dict[str, Any]:
+    async def send_text(self, instance: str, number: str, text: str, instance_token: Optional[str] = None) -> Dict[str, Any]:
         """
-        Sends a text message via Evolution API.
+        Sends a text message via Evolution API or Evolution-Go.
         """
-        endpoint = f"{self.url}/message/sendText/{instance}"
-        payload = {
+        payload_node = {
             "number": number,
             "options": {
                 "delay": 1200,
@@ -28,16 +27,35 @@ class EvolutionAPIClient:
             }
         }
         
+        payload_go = {
+            "number": number,
+            "text": text
+        }
+        
+        headers = self.headers.copy()
+        headers["instance"] = instance
+        if instance_token:
+            headers["apikey"] = instance_token
+        
         async with httpx.AsyncClient() as client:
-            response = await client.post(endpoint, json=payload, headers=self.headers)
+            # Tenta Evolution-Go primeiro
+            endpoint_go = f"{self.url}/send/text"
+            response = await client.post(endpoint_go, json=payload_go, headers=headers)
+            
+            if response.status_code == 404:
+                # Fallback para Evolution API oficial
+                endpoint_node = f"{self.url}/message/sendText/{instance}"
+                response = await client.post(endpoint_node, json=payload_node, headers=headers)
+                
+            if response.status_code != 200:
+                print(f"Error sending message: {response.text}")
             response.raise_for_status()
             return response.json()
 
-    async def send_media(self, instance: str, number: str, media_url: str, caption: str = "", media_type: str = "document") -> Dict[str, Any]:
+    async def send_media(self, instance: str, number: str, media_url: str, caption: str = "", media_type: str = "document", instance_token: Optional[str] = None) -> Dict[str, Any]:
         """
-        Sends a media message (document, image, etc.) via Evolution API.
+        Sends a media message (document, image, etc.) via Evolution API or Evolution-Go.
         """
-        endpoint = f"{self.url}/message/sendMedia/{instance}"
         payload = {
             "number": number,
             "mediaMessage": {
@@ -47,8 +65,19 @@ class EvolutionAPIClient:
             }
         }
         
+        headers = self.headers.copy()
+        headers["instance"] = instance
+        if instance_token:
+            headers["apikey"] = instance_token
+        
         async with httpx.AsyncClient() as client:
-            response = await client.post(endpoint, json=payload, headers=self.headers)
+            endpoint_go = f"{self.url}/send/media"
+            response = await client.post(endpoint_go, json=payload, headers=headers)
+            
+            if response.status_code == 404:
+                endpoint_node = f"{self.url}/message/sendMedia/{instance}"
+                response = await client.post(endpoint_node, json=payload, headers=headers)
+                
             response.raise_for_status()
             return response.json()
 

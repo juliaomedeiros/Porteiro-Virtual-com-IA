@@ -18,6 +18,7 @@ class DocumentoBase(SQLModel):
     file_url: Optional[str] = None
     content_hash: Optional[str] = None
     status: DocumentoStatus = Field(default=DocumentoStatus.PROCESSANDO)
+    error_message: Optional[str] = None
     condominio_id: UUID = Field(foreign_key="condominio.id")
 
 class Documento(DocumentoBase, table=True):

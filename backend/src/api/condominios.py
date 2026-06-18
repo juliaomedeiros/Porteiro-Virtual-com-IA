@@ -48,3 +48,44 @@ def delete_condominio(condominio_id: UUID, session: Session = Depends(get_sessio
     session.delete(condominio)
     session.commit()
     return {"ok": True}
+
+from fastapi import BackgroundTasks
+from pydantic import BaseModel
+from ..services.evolution_api import evolution_api_client
+from ..models.morador import Morador
+import asyncio
+
+class BroadcastMessage(BaseModel):
+    message: str
+    instance_name: str = "default"
+
+async def send_broadcast_task(condominio_id: UUID, message: str, instance_name: str):
+    from ..core.database import engine
+    # In background task, we create a new session
+    with Session(engine) as session:
+        statement = select(Morador).where(
+            Morador.condominio_id == condominio_id,
+            Morador.is_active == True
+        )
+        moradores = session.exec(statement).all()
+        
+    for m in moradores:
+        try:
+            await evolution_api_client.send_text(instance_name, m.phone, message)
+            await asyncio.sleep(1) # delay between messages to avoid ban
+        except Exception as e:
+            print(f"Failed to send broadcast to {m.phone}: {e}")
+
+@router.post("/{condominio_id}/broadcast")
+async def broadcast_message(
+    condominio_id: UUID, 
+    payload: BroadcastMessage, 
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session)
+):
+    condominio = session.get(Condominio, condominio_id)
+    if not condominio:
+        raise HTTPException(status_code=404, detail="Condominio not found")
+        
+    background_tasks.add_task(send_broadcast_task, condominio_id, payload.message, payload.instance_name)
+    return {"status": "accepted", "message": "Broadcast is being sent in the background"}

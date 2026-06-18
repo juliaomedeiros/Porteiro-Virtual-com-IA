@@ -16,6 +16,8 @@ class Condominio(CondominioBase, table=True):
     moradores: List["Morador"] = Relationship(back_populates="condominio")
     areas_comuns: List["AreaComum"] = Relationship(back_populates="condominio")
     documentos: List["Documento"] = Relationship(back_populates="condominio")
+    configuracao_ia: Optional["ConfiguracaoIA"] = Relationship(back_populates="condominio")
+    encomendas: List["Encomenda"] = Relationship(back_populates="condominio")
 
 class CondominioUpdate(SQLModel):
     name: Optional[str] = None

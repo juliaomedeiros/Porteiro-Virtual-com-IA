@@ -11,7 +11,9 @@ import {
   Building2,
   Menu,
   X,
-  Building
+  Building,
+  Megaphone,
+  Package
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
@@ -30,6 +32,8 @@ export default function Sidebar() {
     { name: 'Moradores', href: '/residents', icon: Users },
     { name: 'Áreas Comuns', href: '/areas-comuns', icon: Map },
     { name: 'Documentos & RAG', href: '/documents', icon: FileText },
+    { name: 'Comunicados', href: '/comunicados', icon: Megaphone },
+    { name: 'Encomendas', href: '/encomendas', icon: Package },
   ];
 
   const SidebarContent = () => (
