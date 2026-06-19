@@ -28,14 +28,15 @@ Sistema modular para automação de portaria de condomínios via WhatsApp. Os mo
 O banco Postgres possui as tabelas mapeadas no Alembic:
 1. condominio: Dados do condomínio.
 2. morador: Moradores autorizados.
-3. areacomum: Áreas reserváveis.
-4. reserva: Reservas feitas.
+3. areacomum: Áreas reserváveis. Possui controle de horários (`tipo_reserva`: DIARIA ou POR_BLOCO, e horário de funcionamento).
+4. reserva: Reservas feitas, com `hora_inicio` e `hora_fim` para blocos, e status_pagamento.
 5. documento: Uploads de PDFs para RAG.
 6. embedding: Vetores do pgvector para busca.
 7. interacao: Histórico de interações.
 8. evolution-go: Tabelas do WhatsApp (instances, messages, etc).
 
 ## 📋 Histórico Recente de Mudanças
+- **Reserva Inteligente & Calendário UI**: Implementada checagem real de disponibilidade (blocos/diária) onde o Agente consulta o banco via tool `check_availability` antes de acionar `make_reservation`. A UI de `/reservas` foi reescrita num Calendário Visual com gestão de `PENDENTE` (ponto cinza) e `PAGO` (ponto verde).
 - **Frontend Modernizado**: UI migrada para shadcn/ui. Correção do Tailwind CSS de v3 para v4 (@import "tailwindcss";). Correção do menu Mobile.
 - **Correções Base UI**: O shadcn/ui usa a prop 'render' do base-ui em vez de 'asChild' para <Button>.
 - **Migrations Resolvidas**: Tabelas de sistema criadas rodando 'alembic upgrade head'. O ambiente backend não cria as tabelas automaticamente sem migração.
