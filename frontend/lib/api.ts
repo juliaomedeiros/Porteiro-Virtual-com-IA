@@ -7,6 +7,52 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  if (typeof document !== 'undefined') {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; token=`);
+    if (parts.length === 2) {
+      const token = parts.pop()?.split(';').shift();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+  }
+  return config;
+});
+
+import { toast } from 'sonner';
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== 'undefined') {
+      const status = error.response?.status;
+      const detail = error.response?.data?.detail;
+      
+      if (status === 401) {
+        toast.error('Sua sessão expirou. Por favor, faça login novamente.');
+      } else if (status === 403) {
+        toast.error('Você não tem permissão para realizar esta ação.');
+      } else if (status >= 500) {
+        toast.error('Erro interno no servidor. Tente novamente mais tarde.');
+      } else if (detail && typeof detail === 'string') {
+        // Mostra o erro do backend se vier algo legível, mas preferencialmente em PT-BR
+        if (detail.includes('Email already registered')) {
+          toast.error('Este e-mail já está em uso por outro usuário.');
+        } else if (detail.includes('SINDICO can only create')) {
+          toast.error('Síndicos só podem cadastrar Porteiros.');
+        } else {
+          toast.error(`Erro: ${detail}`);
+        }
+      } else if (status === 400 || status === 404) {
+         toast.error('Falha na operação. Verifique os dados e tente novamente.');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface Morador {
   id: string;
   name: string;

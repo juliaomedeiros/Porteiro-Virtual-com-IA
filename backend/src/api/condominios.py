@@ -90,7 +90,7 @@ async def send_broadcast_task(condominio_id: UUID, message: str, instance_name: 
         try:
             await evolution_api_client.send_text(instance_name, m.phone, message)
             sucessos += 1
-            await asyncio.sleep(1.5) # Anti-ban delay generoso
+            # O anti-ban delay agora é global no evolution_api_client
         except Exception as e:
             erros += 1
             detalhes.append(f"- {m.name} (Apto {m.unit})")

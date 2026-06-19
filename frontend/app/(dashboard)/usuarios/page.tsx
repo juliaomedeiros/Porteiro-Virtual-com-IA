@@ -83,7 +83,7 @@ export default function UsuariosPage() {
       });
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.detail || 'Erro ao criar usuário');
+      // O erro visual já será disparado pelo interceptor global (toast) no api.ts
     }
   };
 

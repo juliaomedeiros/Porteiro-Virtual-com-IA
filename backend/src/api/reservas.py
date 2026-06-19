@@ -8,12 +8,12 @@ from datetime import date as date_type
 from sqlalchemy import extract
 from ..models.reserva import Reserva, ReservaStatus, PagamentoStatus, ReservaCreate
 from ..models.area_comum import AreaComum
-from ..models.usuario import Usuario
+from ..models.usuario import Usuario, UsuarioCondominioLink
 from ..api.deps import get_current_user
 from ..services.evolution_api import evolution_api_client
 from ..services.booking_service import booking_service
 
-router = APIRouter()
+router = APIRouter(prefix="/reservas", tags=["reservas"])
 
 @router.get("/disponibilidade")
 async def check_availability(
@@ -80,12 +80,48 @@ async def aprovar_pagamento(
 
     # Disparar WhatsApp de confirmação
     try:
-        mensagem = f"Olá {reserva.morador.name}! O pagamento da sua reserva para '{reserva.area_comum.name}' no dia {reserva.booking_date.strftime('%d/%m/%Y')} foi confirmado! Sua reserva está garantida."
-        await evolution_api_client.send_text(
-            instance=str(reserva.area_comum.condominio_id), # Assuming instance ID is mapped or available via auto-discovery
-            number=reserva.morador.phone,
-            text=mensagem
+        import asyncio
+        condominio = reserva.area_comum.condominio
+        morador = reserva.morador
+        area = reserva.area_comum
+        data_str = reserva.booking_date.strftime('%d/%m/%Y')
+        apto = f"{morador.unit}" if morador.unit else "Não informado"
+        
+        # Mensagem Morador
+        msg_morador = (
+            f"Olá {morador.name}. O pagamento da sua reserva para {area.name} no *{condominio.name}* no dia {data_str} foi confirmado pelo síndico! "
+            f"Sua reserva está garantida. Ótimo evento!"
         )
+        
+        asyncio.create_task(
+            evolution_api_client.send_text(
+                instance=str(condominio.id),
+                number=morador.phone,
+                text=msg_morador
+            )
+        )
+        
+        # Mensagem Síndico
+        statement = select(Usuario).join(UsuarioCondominioLink).where(
+            UsuarioCondominioLink.condominio_id == condominio.id,
+            Usuario.role == "SINDICO"
+        )
+        sindicos = session.exec(statement).all()
+        
+        msg_sindico = (
+            f"Confirmação registrada no *{condominio.name}*: O pagamento da reserva de {morador.name} (Apto: *{apto}*) "
+            f"para {area.name} em {data_str} foi confirmado por você no painel. A reserva agora está ativa no calendário."
+        )
+        
+        for sindico in sindicos:
+            if sindico.phone:
+                asyncio.create_task(
+                    evolution_api_client.send_text(
+                        instance=str(condominio.id),
+                        number=sindico.phone,
+                        text=msg_sindico
+                    )
+                )
     except Exception as e:
         print(f"Erro ao enviar WhatsApp de confirmação: {e}")
         

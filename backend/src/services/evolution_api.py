@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 from typing import Optional, Dict, Any
 from ..core.config import settings
 
@@ -11,6 +12,7 @@ class EvolutionAPIClient:
             "Content-Type": "application/json"
         }
         self.instance_tokens = {}
+        self.send_lock = asyncio.Lock()
 
     async def get_instance_token(self, instance_name: str) -> str:
         if instance_name in self.instance_tokens:
@@ -53,20 +55,25 @@ class EvolutionAPIClient:
         headers = self.headers.copy()
         headers["apikey"] = token_to_use
         
-        async with httpx.AsyncClient() as client:
-            # Tenta Evolution-Go primeiro
-            endpoint_go = f"{self.url}/send/text"
-            response = await client.post(endpoint_go, json=payload_go, headers=headers)
-            
-            if response.status_code in [404, 401]:
-                # Fallback para Evolution API oficial (algumas versões do EvoGo usam a rota legada)
-                endpoint_node = f"{self.url}/message/sendText/{instance}"
-                response = await client.post(endpoint_node, json=payload_node, headers=headers)
+        async with self.send_lock:
+            async with httpx.AsyncClient() as client:
+                # Tenta Evolution-Go primeiro
+                endpoint_go = f"{self.url}/send/text"
+                response = await client.post(endpoint_go, json=payload_go, headers=headers)
                 
-            if response.status_code != 200:
-                print(f"Error sending message: {response.text}")
-            response.raise_for_status()
-            return response.json()
+                if response.status_code in [404, 401]:
+                    # Fallback para Evolution API oficial (algumas versões do EvoGo usam a rota legada)
+                    endpoint_node = f"{self.url}/message/sendText/{instance}"
+                    response = await client.post(endpoint_node, json=payload_node, headers=headers)
+                    
+                if response.status_code != 200:
+                    print(f"Error sending message: {response.text}")
+                response.raise_for_status()
+                
+                # Conta-gotas global: força a fila inteira a aguardar 1.5s antes de liberar o Lock
+                await asyncio.sleep(1.5)
+                
+                return response.json()
 
     async def send_media(self, instance: str, number: str, media_url: str, media_type: str, caption: str = "", instance_token: str = None) -> dict:
         """
@@ -87,15 +94,17 @@ class EvolutionAPIClient:
         headers = self.headers.copy()
         headers["apikey"] = token_to_use
         
-        async with httpx.AsyncClient() as client:
-            endpoint_go = f"{self.url}/send/media"
-            response = await client.post(endpoint_go, json=payload, headers=headers)
-            
-            if response.status_code == 404:
-                endpoint_node = f"{self.url}/message/sendMedia/{instance}"
-                response = await client.post(endpoint_node, json=payload, headers=headers)
+        async with self.send_lock:
+            async with httpx.AsyncClient() as client:
+                endpoint_go = f"{self.url}/send/media"
+                response = await client.post(endpoint_go, json=payload, headers=headers)
                 
-            response.raise_for_status()
-            return response.json()
+                if response.status_code == 404:
+                    endpoint_node = f"{self.url}/message/sendMedia/{instance}"
+                    response = await client.post(endpoint_node, json=payload, headers=headers)
+                    
+                response.raise_for_status()
+                await asyncio.sleep(1.5)
+                return response.json()
 
 evolution_api_client = EvolutionAPIClient()

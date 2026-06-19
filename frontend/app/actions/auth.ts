@@ -50,7 +50,7 @@ export async function login(prevState: any, formData: FormData) {
     // Create cookie (Using cookies() from next/headers)
     const cookieStore = await cookies()
     cookieStore.set('token', data.access_token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
