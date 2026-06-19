@@ -75,10 +75,11 @@ async def send_broadcast_task(condominio_id: UUID, message: str, instance_name: 
         )
         moradores = session.exec(statement).all()
         
-        sindico_stmt = select(Morador).where(
-            Morador.condominio_id == condominio_id,
-            Morador.is_sindico == True,
-            Morador.is_active == True
+        from ..models.usuario import Usuario, UsuarioCondominioLink
+        sindico_stmt = select(Usuario).join(UsuarioCondominioLink).where(
+            UsuarioCondominioLink.condominio_id == condominio_id,
+            Usuario.role == "SINDICO",
+            Usuario.is_active == True
         )
         sindicos = session.exec(sindico_stmt).all()
         
