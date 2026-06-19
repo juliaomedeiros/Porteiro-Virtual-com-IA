@@ -131,7 +131,14 @@ async def whatsapp_webhook(
         return {"status": "processed", "reason": "escalated_to_human"}
 
     # Process via LangChain (US1)
-    ai_response = await ai_service.get_response(session, resident, text)
+    try:
+        ai_response = await ai_service.get_response(session, resident, text)
+    except Exception as e:
+        print(f"Error processing AI response: {e}")
+        from ..models.condominio import Condominio
+        condominio = session.get(Condominio, resident.condominio_id)
+        condo_name = condominio.name if condominio else "seu condomínio"
+        ai_response = f"Desculpe, meu sistema interno de buscas falhou momentaneamente. Por favor, tente de novo em instantes ou entre em contato com o síndico do {condo_name}."
     
     # Send response back to WhatsApp
     try:

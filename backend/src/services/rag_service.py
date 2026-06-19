@@ -52,7 +52,6 @@ class RAGService:
             select(Embedding)
             .join(Documento)
             .where(Documento.condominio_id == condominio_id)
-            .where(Embedding.doc_metadata["condominio_id"].astext == str(condominio_id))
             .order_by(Embedding.embedding.cosine_distance(query_vector))
             .limit(limit)
         )
