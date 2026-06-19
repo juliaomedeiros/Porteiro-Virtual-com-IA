@@ -163,6 +163,71 @@ export default function AreasComunsList() {
                     onChange={e => setFormData({...formData, max_capacity: parseInt(e.target.value)})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="taxa">Taxa de Reserva (R$)</Label>
+                  <Input 
+                    id="taxa" 
+                    type="number"
+                    step="0.01"
+                    value={formData.taxa || ''} 
+                    onChange={e => setFormData({...formData, taxa: parseFloat(e.target.value)})}
+                    placeholder="Deixe em branco se isento" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="chave_pix">Chave PIX (se houver taxa)</Label>
+                  <Input 
+                    id="chave_pix" 
+                    value={formData.chave_pix || ''} 
+                    onChange={e => setFormData({...formData, chave_pix: e.target.value})}
+                    placeholder="E-mail, CPF, Celular, etc" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tipo_reserva">Tipo de Reserva</Label>
+                  <select 
+                    id="tipo_reserva" 
+                    required 
+                    value={formData.tipo_reserva || 'DIARIA'} 
+                    onChange={e => setFormData({...formData, tipo_reserva: e.target.value})}
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  >
+                    <option value="DIARIA">Diária Completa</option>
+                    <option value="POR_BLOCO">Por Bloco de Horas</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hora_inicio_funcionamento">Hora Início</Label>
+                    <Input 
+                      id="hora_inicio_funcionamento" 
+                      type="time"
+                      value={formData.hora_inicio_funcionamento || ''} 
+                      onChange={e => setFormData({...formData, hora_inicio_funcionamento: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hora_fim_funcionamento">Hora Fim</Label>
+                    <Input 
+                      id="hora_fim_funcionamento" 
+                      type="time"
+                      value={formData.hora_fim_funcionamento || ''} 
+                      onChange={e => setFormData({...formData, hora_fim_funcionamento: e.target.value})}
+                    />
+                  </div>
+                </div>
+                {formData.tipo_reserva === 'POR_BLOCO' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="duracao_bloco_horas">Duração do Bloco (Horas)</Label>
+                    <Input 
+                      id="duracao_bloco_horas" 
+                      type="number"
+                      required
+                      value={formData.duracao_bloco_horas || ''} 
+                      onChange={e => setFormData({...formData, duracao_bloco_horas: parseInt(e.target.value)})}
+                    />
+                  </div>
+                )}
                 {isAdmin && (
                   <div className="space-y-2">
                     <Label htmlFor="condominio_id">Condomínio</Label>
@@ -232,7 +297,7 @@ export default function AreasComunsList() {
                   </div>
                   <div className="flex items-center gap-1.5 text-xs font-medium">
                     <Calendar size={14} className="text-slate-400" />
-                    Reservável
+                    {area.taxa ? `R$ ${area.taxa.toFixed(2)}` : 'Isento'}
                   </div>
                 </div>
               </CardContent>

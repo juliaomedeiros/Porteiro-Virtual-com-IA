@@ -13,7 +13,9 @@ import {
   X,
   Building,
   Megaphone,
-  Package
+  Package,
+  CalendarCheck,
+  ShieldCheck
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
@@ -29,8 +31,10 @@ export default function Sidebar() {
   const menuItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     ...(isAdmin ? [{ name: 'Condomínios', href: '/condominios', icon: Building }] : []),
+    { name: 'Equipe', href: '/usuarios', icon: ShieldCheck },
     { name: 'Moradores', href: '/residents', icon: Users },
     { name: 'Áreas Comuns', href: '/areas-comuns', icon: Map },
+    { name: 'Reservas', href: '/reservas', icon: CalendarCheck },
     { name: 'Documentos & RAG', href: '/documents', icon: FileText },
     { name: 'Comunicados', href: '/comunicados', icon: Megaphone },
     { name: 'Encomendas', href: '/encomendas', icon: Package },

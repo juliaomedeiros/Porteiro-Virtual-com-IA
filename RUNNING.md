@@ -25,6 +25,7 @@ GOOGLE_API_KEY=sua_chave_gemini_aqui
 # Evolution API (Integração WhatsApp)
 EVOLUTION_API_URL=http://seu_link_evolution:8080
 EVOLUTION_API_KEY=sua_apikey_evolution
+EVOLUTION_INSTANCE_NAME=nome_da_sua_instancia
 
 # LangSmith (Opcional - Monitoramento)
 LANGSMITH_API_KEY=sua_chave_langsmith
@@ -62,6 +63,13 @@ alembic upgrade head
 
 - **Painel Administrativo (Frontend)**: [http://localhost:3001](http://localhost:3001)
 - **Documentação da API (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### 5. Configurar o Webhook no Evolution-Go
+
+Para que o bot (backend) receba as mensagens dos moradores, é necessário configurar o Webhook na sua instância do Evolution-Go.
+Aponte o Webhook para o endereço interno do Docker do backend:
+- **URL do Webhook:** `http://backend:8000/api/v1/webhooks/evolution-go`
+- **Eventos:** Selecione o evento `messages` (ou `messages.upsert`).
 
 ---
 

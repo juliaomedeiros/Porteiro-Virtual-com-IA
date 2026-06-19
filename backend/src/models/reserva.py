@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
 
@@ -13,11 +13,26 @@ class ReservaStatus(str, Enum):
     CONFIRMADA = "CONFIRMADA"
     CANCELADA = "CANCELADA"
 
+class PagamentoStatus(str, Enum):
+    ISENTO = "ISENTO"
+    PENDENTE = "PENDENTE"
+    PAGO = "PAGO"
+
 class ReservaBase(SQLModel):
     booking_date: date
+    hora_inicio: Optional[str] = None # e.g. "08:00"
+    hora_fim: Optional[str] = None    # e.g. "11:00"
     status: ReservaStatus = Field(default=ReservaStatus.PENDENTE)
+    status_pagamento: PagamentoStatus = Field(default=PagamentoStatus.ISENTO)
     morador_id: UUID = Field(foreign_key="morador.id")
     area_id: UUID = Field(foreign_key="areacomum.id")
+
+class ReservaCreate(SQLModel):
+    booking_date: date
+    hora_inicio: Optional[str] = None
+    hora_fim: Optional[str] = None
+    morador_id: UUID
+    area_id: UUID
 
 class Reserva(ReservaBase, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)

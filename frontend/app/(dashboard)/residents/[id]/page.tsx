@@ -64,7 +64,11 @@ export default function EditResident({ params }: { params: Promise<{ id: string 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let newValue = value;
+    if (name === 'unit') {
+      newValue = value.replace(/\D/g, '');
+    }
+    setFormData(prev => ({ ...prev, [name]: newValue }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,7 +77,12 @@ export default function EditResident({ params }: { params: Promise<{ id: string 
     setError(null);
 
     try {
-      await moradoresApi.update(id, formData);
+      let formattedPhone = formData.phone.replace(/\D/g, '');
+      if (formattedPhone.length === 10 || formattedPhone.length === 11) {
+        formattedPhone = '55' + formattedPhone;
+      }
+      const payload = { ...formData, phone: formattedPhone };
+      await moradoresApi.update(id, payload);
       router.push('/residents');
     } catch (err: any) {
       console.error('Error updating resident:', err);
@@ -174,6 +183,8 @@ export default function EditResident({ params }: { params: Promise<{ id: string 
                       value={formData.unit}
                       onChange={handleChange}
                       required
+                      type="text"
+                      inputMode="numeric"
                     />
                   </div>
 

@@ -53,7 +53,11 @@ export default function NewResident() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let newValue = value;
+    if (name === 'unit') {
+      newValue = value.replace(/\D/g, '');
+    }
+    setFormData(prev => ({ ...prev, [name]: newValue }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +66,12 @@ export default function NewResident() {
     setError(null);
 
     try {
-      await moradoresApi.create(formData);
+      let formattedPhone = formData.phone.replace(/\D/g, '');
+      if (formattedPhone.length === 10 || formattedPhone.length === 11) {
+        formattedPhone = '55' + formattedPhone;
+      }
+      const payload = { ...formData, phone: formattedPhone };
+      await moradoresApi.create(payload);
       router.push('/residents');
     } catch (err: any) {
       console.error('Error creating resident:', err);
@@ -153,7 +162,9 @@ export default function NewResident() {
                   value={formData.unit}
                   onChange={handleChange}
                   required
-                  placeholder="Ex: Apt 101"
+                  placeholder="Ex: 101"
+                  type="text"
+                  inputMode="numeric"
                 />
               </div>
 

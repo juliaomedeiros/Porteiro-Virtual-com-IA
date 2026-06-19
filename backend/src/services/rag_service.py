@@ -47,11 +47,12 @@ class RAGService:
         query_vector = await self.embeddings.aembed_query(query_text)
         
         # Use pgvector cosine_distance for similarity search
-        # Filter by condominio_id via join with Documento
+        # Filter by both Documento relation and metadata strict filtering for tenant isolation
         statement = (
             select(Embedding)
             .join(Documento)
             .where(Documento.condominio_id == condominio_id)
+            .where(Embedding.doc_metadata["condominio_id"].astext == str(condominio_id))
             .order_by(Embedding.embedding.cosine_distance(query_vector))
             .limit(limit)
         )

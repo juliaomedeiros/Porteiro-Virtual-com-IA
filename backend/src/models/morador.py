@@ -14,7 +14,6 @@ class MoradorBase(SQLModel):
     phone: str = Field(index=True, unique=True)
     unit: str
     is_active: bool = Field(default=True)
-    is_sindico: bool = Field(default=False)
     status_bot: str = Field(default="ATIVO")
     condominio_id: UUID = Field(foreign_key="condominio.id")
 

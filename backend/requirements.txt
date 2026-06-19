@@ -19,3 +19,8 @@ httpx
 respx
 litellm
 cryptography
+easyocr
+opencv-python-headless
+passlib
+bcrypt==3.2.2
+python-jose[cryptography]

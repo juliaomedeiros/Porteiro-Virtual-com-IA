@@ -1,7 +1,17 @@
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
+
+from .usuario import UsuarioCondominioLink
+
+if TYPE_CHECKING:
+    from .morador import Morador
+    from .area_comum import AreaComum
+    from .documento import Documento
+    from .configuracao_ia import ConfiguracaoIA
+    from .encomenda import Encomenda
+    from .usuario import Usuario
 
 class CondominioBase(SQLModel):
     name: str = Field(index=True)
@@ -18,6 +28,7 @@ class Condominio(CondominioBase, table=True):
     documentos: List["Documento"] = Relationship(back_populates="condominio")
     configuracao_ia: Optional["ConfiguracaoIA"] = Relationship(back_populates="condominio")
     encomendas: List["Encomenda"] = Relationship(back_populates="condominio")
+    usuarios: List["Usuario"] = Relationship(back_populates="condominios", link_model=UsuarioCondominioLink)
 
 class CondominioUpdate(SQLModel):
     name: Optional[str] = None

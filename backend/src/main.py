@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
-from .api import webhooks, condominios, moradores, areas_comuns, documentos, analytics, encomendas
+from .api import webhooks, condominios, moradores, areas_comuns, documentos, analytics, encomendas, auth, inbox, reservas, usuarios
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -18,6 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix=settings.API_V1_STR)
+app.include_router(inbox.router, prefix=settings.API_V1_STR)
 app.include_router(webhooks.router, prefix=settings.API_V1_STR)
 app.include_router(condominios.router, prefix=settings.API_V1_STR)
 app.include_router(moradores.router, prefix=settings.API_V1_STR)
@@ -25,6 +27,8 @@ app.include_router(areas_comuns.router, prefix=settings.API_V1_STR)
 app.include_router(documentos.router, prefix=settings.API_V1_STR)
 app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(encomendas.router, prefix=settings.API_V1_STR)
+app.include_router(reservas.router, prefix=settings.API_V1_STR)
+app.include_router(usuarios.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():

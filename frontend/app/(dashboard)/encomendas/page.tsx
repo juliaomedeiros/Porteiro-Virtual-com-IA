@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
-import { encomendasApi, Encomenda, condominiosApi, Condominio } from '@/lib/api';
+import { encomendasApi, Encomenda, condominiosApi, Condominio, moradoresApi } from '@/lib/api';
 import { Package, Plus, Trash2, CheckCircle, PackageOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,9 @@ export default function EncomendasPage() {
     descricao: ''
   });
 
+  const [moradores, setMoradores] = useState<any[]>([]);
+  const [unidades, setUnidades] = useState<string[]>([]);
+
   useEffect(() => {
     if (isAdmin) {
       condominiosApi.list().then(res => {
@@ -40,6 +43,7 @@ export default function EncomendasPage() {
   useEffect(() => {
     if (selectedCondo) {
       fetchEncomendas();
+      fetchMoradores();
     }
   }, [selectedCondo]);
 
@@ -55,6 +59,27 @@ export default function EncomendasPage() {
     }
   };
 
+  const fetchMoradores = async () => {
+    try {
+      // Import moradoresApi at the top if not already (it is imported)
+      const res = await moradoresApi.list(selectedCondo);
+      setMoradores(res.data);
+      const uniqueUnits = Array.from(new Set(res.data.map((m: any) => m.unit))).sort();
+      setUnidades(uniqueUnits as string[]);
+    } catch (err) {
+      console.error('Error fetching moradores', err);
+    }
+  };
+
+  const handleUnitChange = (unit: string) => {
+    const morador = moradores.find(m => m.unit === unit);
+    setForm(prev => ({
+      ...prev,
+      unidade: unit,
+      destinatario: prev.destinatario || (morador ? morador.name : '')
+    }));
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCondo) return;
@@ -67,7 +92,7 @@ export default function EncomendasPage() {
       });
       setForm({ destinatario: '', unidade: '', tamanho: 'Pequeno', descricao: '' });
       fetchEncomendas();
-      alert('Encomenda registrada! O morador foi notificado via WhatsApp.');
+      alert('Encomenda registrada! O morador principal da unidade foi notificado via WhatsApp.');
     } catch (err) {
       console.error(err);
       alert('Erro ao registrar encomenda.');
@@ -130,12 +155,17 @@ export default function EncomendasPage() {
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-sm font-medium text-slate-700">Unidade/Apto</label>
-                <Input 
-                  required 
-                  placeholder="Ex: 101A"
+                <select 
+                  required
+                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
                   value={form.unidade}
-                  onChange={(e) => setForm({...form, unidade: e.target.value})}
-                />
+                  onChange={(e) => handleUnitChange(e.target.value)}
+                >
+                  <option value="" disabled>Selecione a Unidade</option>
+                  {unidades.map(u => (
+                    <option key={u} value={u}>{u}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium text-slate-700">Destinatário</label>

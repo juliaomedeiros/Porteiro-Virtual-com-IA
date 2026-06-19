@@ -3,9 +3,10 @@ from uuid import UUID
 import os
 import shutil
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 from ..core.database import get_session
 from ..models.documento import Documento, DocumentoStatus
+from ..models.embedding import Embedding
 from ..workers.pdf_processor import pdf_processor
 from ..services.rag_service import rag_service
 
@@ -32,8 +33,9 @@ async def process_document(doc_id: UUID, file_path: str):
             # 2. Create chunks
             chunks = pdf_processor.create_chunks(text)
             
-            # 3. Add to RAG service (embeddings)
-            await rag_service.add_chunks(session, doc_id, chunks)
+            # 3. Add to RAG service (embeddings) with metadata
+            metadatas = [{"condominio_id": str(db_doc.condominio_id)} for _ in chunks]
+            await rag_service.add_chunks(session, doc_id, chunks, metadatas=metadatas)
             
             # 4. Update status
             db_doc.status = DocumentoStatus.INDEXADO
@@ -93,9 +95,9 @@ def delete_document(document_id: UUID, session: Session = Depends(get_session)):
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
     
-    # Cascade delete is handled by database if configured, 
-    # but here we might need to manually delete embeddings if not.
-    # SQLModel Relationship with cascade="all, delete" should handle it.
+    # Delete associated embeddings manually to prevent Foreign Key constraint errors
+    delete_statement = delete(Embedding).where(Embedding.document_id == document_id)
+    session.exec(delete_statement)
     
     session.delete(document)
     session.commit()

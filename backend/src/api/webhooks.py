@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
-from sqlmodel import Session, select
+from sqlmodel import Session, select, or_
 from ..core.database import get_session
 from ..models.morador import Morador
 from ..services.ai_service import ai_service
@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
-@router.post("/whatsapp")
+@router.post("/evolution-go")
 async def whatsapp_webhook(
     payload: Dict[str, Any],
     session: Session = Depends(get_session),
@@ -17,8 +17,8 @@ async def whatsapp_webhook(
     """
     Receives WhatsApp messages from Evolution API.
     """
-    event = payload.get("event")
-    if event not in ["messages.upsert", "MESSAGES_UPSERT", "messages-upsert", "Message"]:
+    event = str(payload.get("event", ""))
+    if event.upper() not in ["MESSAGES.UPSERT", "MESSAGES_UPSERT", "MESSAGES-UPSERT", "MESSAGE"]:
         return {"status": "ignored", "reason": "event_not_supported"}
 
     data = payload.get("data", {})
@@ -49,13 +49,30 @@ async def whatsapp_webhook(
     # Extract phone number (remove @s.whatsapp.net)
     phone = remote_jid.split("@")[0]
     
+    # Normalização do 9º dígito (Fantasma do Nono Dígito no Brasil)
+    phone_com_9 = phone
+    phone_sem_9 = phone
+    
+    if phone.startswith("55") and len(phone) == 12:
+        # Faltando o 9 (Ex: 55 83 8147 3750) -> Insere o 9
+        phone_com_9 = f"{phone[:4]}9{phone[4:]}"
+    elif phone.startswith("55") and len(phone) == 13:
+        # Com o 9 (Ex: 55 83 9 8147 3750) -> Remove o 9
+        phone_sem_9 = f"{phone[:4]}{phone[5:]}"
+    
     # Validate resident
-    statement = select(Morador).where(Morador.phone.contains(phone), Morador.is_active == True)
+    statement = select(Morador).where(
+        or_(
+            Morador.phone.contains(phone_com_9),
+            Morador.phone.contains(phone_sem_9)
+        ),
+        Morador.is_active == True
+    )
     resident = session.exec(statement).first()
     
     if not resident:
         try:
-            unauthorized_msg = "Não há cadastro desse numero."
+            unauthorized_msg = "Não há cadastro desse número de telefone nos dados do condomínio. Entre em contato com a administração do seu condomínio para regularizar a situação e poder utilizar o atendimento via WhatsApp."
             await evolution_api_client.send_text(instance, phone, unauthorized_msg, instance_token)
         except Exception as e:
             print(f"Error sending unauthorized message to {phone}: {e}")
@@ -96,12 +113,20 @@ async def whatsapp_webhook(
             print(f"Error sending escalation msg: {e}")
         
         # Notify syndics
-        sindicos = session.exec(select(Morador).where(Morador.condominio_id == resident.condominio_id, Morador.is_sindico == True)).all()
+        from ..models.usuario import Usuario, UsuarioCondominioLink
+        sindicos = session.exec(
+            select(Usuario)
+            .join(UsuarioCondominioLink)
+            .where(UsuarioCondominioLink.condominio_id == resident.condominio_id)
+            .where(Usuario.role == "SINDICO")
+        ).all()
+        
         for s in sindicos:
-            try:
-                await evolution_api_client.send_text(instance, s.phone, f"⚠️ *Transbordo Solicitado*\nMorador: {resident.name} (Unidade {resident.unit})\nMensagem: {text}\nPara responder, fale diretamente com ele pelo seu WhatsApp ou acesse o painel.", instance_token)
-            except Exception as e:
-                print(f"Error notifying syndic {s.phone}: {e}")
+            if s.phone:
+                try:
+                    await evolution_api_client.send_text(instance, s.phone, f"⚠️ *Transbordo Solicitado*\nMorador: {resident.name} (Unidade {resident.unit})\nMensagem: {text}\nPara responder, fale diretamente com ele pelo seu WhatsApp ou acesse o painel.", instance_token)
+                except Exception as e:
+                    print(f"Error notifying syndic {s.phone}: {e}")
         
         return {"status": "processed", "reason": "escalated_to_human"}
 

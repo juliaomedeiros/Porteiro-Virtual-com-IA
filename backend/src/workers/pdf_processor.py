@@ -2,6 +2,7 @@ import fitz  # PyMuPDF
 import pymupdf4llm
 from typing import List, Dict, Any
 import os
+import easyocr
 
 class PDFProcessor:
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
@@ -27,12 +28,27 @@ class PDFProcessor:
     def _ocr_fallback(self, file_path: str) -> str:
         """
         Fallback to OCR if text extraction fails or returns too little text.
-        Note: Requires Tesseract OCR installed on the system.
+        Uses EasyOCR to extract text from images.
         """
-        # Placeholder for OCR implementation
-        # In a real scenario, we would use pytesseract here
-        # for page in doc: image = page.get_pixmap(); ...
-        return "[OCR Fallback required - scanned document detected]"
+        print(f"Extraindo texto (OCR) de: {file_path}...")
+        # Inicializa lazily para não pesar a inicialização da API
+        if not hasattr(self, 'reader'):
+            self.reader = easyocr.Reader(['pt'])
+            
+        doc = fitz.open(file_path)
+        textos = []
+        
+        for num_pagina, page in enumerate(doc):
+            print(f"  Lendo página {num_pagina + 1}...")
+            # Converte a página em imagem
+            pix = page.get_pixmap()
+            img_bytes = pix.tobytes("png")
+            
+            # O EasyOCR lê a imagem
+            resultados = self.reader.readtext(img_bytes, detail=0)
+            textos.append("\n".join(resultados))
+            
+        return "\n\n".join(textos)
 
     def create_chunks(self, text: str) -> List[str]:
         """

@@ -124,17 +124,32 @@ export const areasComunsApi = {
 export interface AreaComum {
   id: string;
   name: string;
-  description: string | null;
-  max_capacity: number | null;
-  rules: string | null;
+  description?: string;
+  max_capacity?: number;
+  rules?: string;
   condominio_id: string;
+  taxa?: number;
+  chave_pix?: string;
+  tipo_reserva?: string;
+  hora_inicio_funcionamento?: string;
+  hora_fim_funcionamento?: string;
+  duracao_bloco_horas?: number;
 }
 
 export const analyticsApi = {
-  getStats: (condominio_id: string) => 
-    api.get<Stats>('/analytics/stats', { params: { condominio_id } }),
-  getLogs: (condominio_id: string, params?: { limit?: number, only_escalated?: boolean }) => 
-    api.get<Interacao[]>('/analytics/logs', { params: { ...params, condominio_id } }),
+  getStats: (condominioId: string) => api.get<Stats>(`/analytics/stats`, { params: { condominio_id: condominioId } }),
+  getLogs: (condominioId: string, params?: { limit?: number; only_escalated?: boolean }) => 
+    api.get<Interacao[]>(`/analytics/logs`, { params: { condominio_id: condominioId, ...params } }),
+};
+
+export interface InboxItem {
+  morador: Morador;
+  interacoes: Interacao[];
+}
+
+export const inboxApi = {
+  list: (condominioId: string) => api.get<InboxItem[]>(`/inbox/`, { params: { condominio_id: condominioId } }),
+  reply: (moradorId: string, message: string) => api.post(`/inbox/reply`, { morador_id: moradorId, message }),
 };
 
 export interface Encomenda {
@@ -160,4 +175,12 @@ export const encomendasApi = {
     api.delete(`/encomendas/${id}`),
 };
 
+export const reservasApi = {
+  list: (condominioId: string) => api.get(`/reservas/?condominio_id=${condominioId}`),
+  aprovarPagamento: (id: string) => api.patch(`/reservas/${id}/pagamento`),
+  cancelar: (id: string) => api.patch(`/reservas/${id}/cancelar`),
+  create: (data: any) => api.post('/reservas/', data),
+};
+
+export { api };
 export default api;

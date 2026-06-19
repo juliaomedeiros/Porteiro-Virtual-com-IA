@@ -7,13 +7,27 @@ from ..models.morador import Morador, MoradorBase, MoradorUpdate
 
 router = APIRouter(prefix="/moradores", tags=["moradores"])
 
+from sqlalchemy.exc import IntegrityError
+
 @router.post("/", response_model=Morador, status_code=status.HTTP_201_CREATED)
 def create_morador(morador: MoradorBase, session: Session = Depends(get_session)):
     db_morador = Morador.model_validate(morador)
+    
+    # Se o frontend enviar CPF como string vazia, converte para nulo para não quebrar o UNIQUE constraint
+    if getattr(db_morador, "cpf", None) == "":
+        db_morador.cpf = None
+        
     session.add(db_morador)
-    session.commit()
-    session.refresh(db_morador)
-    return db_morador
+    try:
+        session.commit()
+        session.refresh(db_morador)
+        return db_morador
+    except IntegrityError as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Já existe um morador cadastrado com este Telefone ou CPF no sistema."
+        )
 
 @router.get("/", response_model=List[Morador])
 def read_moradores(

@@ -7,6 +7,7 @@ from .embedding import Embedding
 from .interacao import Interacao
 from .configuracao_ia import ConfiguracaoIA
 from .encomenda import Encomenda
+from .usuario import Usuario, UsuarioCondominioLink
 
 __all__ = [
     "Condominio",
@@ -18,4 +19,6 @@ __all__ = [
     "Interacao",
     "ConfiguracaoIA",
     "Encomenda",
+    "Usuario",
+    "UsuarioCondominioLink",
 ]

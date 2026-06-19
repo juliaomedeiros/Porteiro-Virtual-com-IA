@@ -9,10 +9,13 @@ from ..services.evolution_api import evolution_api_client
 
 router = APIRouter(prefix="/encomendas", tags=["encomendas"])
 
+from ..core.config import settings
+
 async def send_encomenda_notification(morador_phone: str, destinatario: str, tamanho: str, descricao: str):
     message = f"📦 *Sua Encomenda Chegou!*\n\nOlá! Uma nova encomenda foi recebida na portaria.\n\n*Destinatário*: {destinatario}\n*Tamanho*: {tamanho}\n*Descrição*: {descricao or 'Não informada'}\n\nPor favor, venha retirar o mais breve possível."
     try:
-        await evolution_api_client.send_text("default", morador_phone, message)
+        instance = settings.EVOLUTION_INSTANCE_NAME
+        await evolution_api_client.send_text(instance, morador_phone, message)
     except Exception as e:
         print(f"Failed to notify morador about encomenda: {e}")
 
@@ -23,19 +26,18 @@ def create_encomenda(encomenda: EncomendaCreate, background_tasks: BackgroundTas
     session.commit()
     session.refresh(db_encomenda)
     
-    # Try to notify the resident of that unit
+    # Try to notify ONE resident of that unit (the primary one)
     statement = select(Morador).where(
         Morador.condominio_id == encomenda.condominio_id,
         Morador.unit == encomenda.unidade,
         Morador.is_active == True
-    )
-    moradores = session.exec(statement).all()
+    ).order_by(Morador.created_at.asc())  # Oldest is usually primary
+    morador = session.exec(statement).first()
     
-    # Send notification to all active residents of the unit
-    for m in moradores:
+    if morador:
         background_tasks.add_task(
             send_encomenda_notification,
-            morador_phone=m.phone,
+            morador_phone=morador.phone,
             destinatario=encomenda.destinatario,
             tamanho=encomenda.tamanho,
             descricao=encomenda.descricao
